@@ -1,12 +1,37 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
-let characterX = canvas.width / 2; // Start position in the middle of the canvas
-let characterSpeed = 10; // Speed of the character
+const arena = {
+    width: 1000,
+    height: 600
+};
+
+let player = {
+    speed: 10,
+    x: 30,
+    y: 0
+}
+let currAction = "idle"
+
+// Sprite sheet details
+let spriteSheet = new Image();
+let currentFrame = 0;
+spriteSheet.src = 'animations/fang/spritesheet.bmp';
+animations = {
+  "idle": {
+    frames: [
+      { x: -2, y: -5, width: 210, height: 240 },
+      { x: 215, y: 0, width: 210, height: 240 },
+      { x: 425, y: -3, width: 210, height: 240 },
+      { x: 215, y: 0, width: 210, height: 240 }
+    ],
+    rate: 500 
+  }
+};
 
 function drawCharacter() {
-    ctx.fillStyle = '#0095DD'; // Character color
-    ctx.fillRect(characterX, canvas.height - 50, 50, 50); // Draw a simple square to represent the character
+    let frame = animations[currAction].frames[currentFrame];
+    ctx.drawImage(spriteSheet, frame.x, frame.y, frame.width, frame.height, player.x, 360, frame.width, frame.height);
 }
 
 function clearCanvas() {
@@ -16,14 +41,28 @@ function clearCanvas() {
 function updateGame() {
     clearCanvas();
     drawCharacter();
+    requestAnimationFrame(updateGame);
 }
+
+function updateFrame() {
+    currentFrame++;
+    if (currentFrame >= animations[currAction].frames.length) {
+        currentFrame = 0;
+    }
+}
+
+setInterval(updateFrame, animations[currAction].rate); 
 
 // Begin keyboard controls
 document.addEventListener('keydown', (event) => {
     if(event.key == "Right" || event.key == "ArrowRight") {
-        characterX += characterSpeed; // Move right
+        if (player.x < arena.width - player.speed) {
+          player.x += player.speed;
+        }
     } else if(event.key == "Left" || event.key == "ArrowLeft") {
-        characterX -= characterSpeed; // Move left
+        if (player.x >= player.speed) {
+            player.x -= player.speed;
+        }
     }
 
     updateGame();
